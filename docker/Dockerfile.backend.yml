@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /backend
+
+RUN pip install uv
+
+COPY backend/pyproject.toml backend/uv.lock* ./
+RUN uv venv && . .venv/bin/activate && uv pip install -e .
+
+COPY backend/ ./
+
+ENV PATH="/backend/.venv/bin:$PATH"
+ENV PYTHONPATH="/backend/app"
+
+WORKDIR /backend/app
+
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]

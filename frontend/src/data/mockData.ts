@@ -1,0 +1,41 @@
+import { Truck, Driver, Job } from "@/types/fleet";
+
+export const initialTrucks: Truck[] = [
+  { id: "TRK-001", registration: "AB 1234 CD", capacity: 20, status: "available", type: "flatbed", model: "Volvo FH16", year: 2022 },
+  { id: "TRK-002", registration: "EF 5678 GH", capacity: 15, status: "in-transit", type: "box", model: "Scania R500", year: 2021 },
+  { id: "TRK-003", registration: "IJ 9012 KL", capacity: 25, status: "maintenance", type: "tipper", model: "MAN TGX", year: 2020 },
+  { id: "TRK-004", registration: "MN 3456 OP", capacity: 18, status: "in-transit", type: "curtainside", model: "DAF XF", year: 2023 },
+  { id: "TRK-005", registration: "QR 7890 ST", capacity: 30, status: "available", type: "flatbed", model: "Mercedes Actros", year: 2022 },
+  { id: "TRK-006", registration: "UV 1234 WX", capacity: 12, status: "available", type: "refrigerated", model: "Iveco S-Way", year: 2021 },
+  { id: "TRK-007", registration: "YZ 5678 AB", capacity: 22, status: "in-transit", type: "tanker", model: "Volvo FH", year: 2023 },
+  { id: "TRK-008", registration: "CD 9012 EF", capacity: 28, status: "maintenance", type: "tipper", model: "Scania S730", year: 2019 },
+  { id: "TRK-009", registration: "GH 3456 IJ", capacity: 16, status: "available", type: "box", model: "MAN TGS", year: 2022 },
+  { id: "TRK-010", registration: "KL 7890 MN", capacity: 35, status: "available", type: "flatbed", model: "DAF CF", year: 2021 },
+  { id: "TRK-011", registration: "OP 1234 QR", capacity: 10, status: "available", type: "refrigerated", model: "Mercedes Atego", year: 2023 },
+  { id: "TRK-012", registration: "ST 5678 UV", capacity: 40, status: "maintenance", type: "tipper", model: "Volvo FMX", year: 2020 },
+];
+
+export const initialDrivers: Driver[] = [
+  { id: "DRV-001", name: "Mike Johnson", licenseNumber: "JOHN-801234-MJ", phone: "+44 7700 900001", email: "mike.j@haultrack.com", status: "active" },
+  { id: "DRV-002", name: "Sarah Williams", licenseNumber: "WILL-802345-SW", phone: "+44 7700 900002", email: "sarah.w@haultrack.com", status: "active" },
+  { id: "DRV-003", name: "Tom Brown", licenseNumber: "BROW-803456-TB", phone: "+44 7700 900003", email: "tom.b@haultrack.com", status: "active" },
+  { id: "DRV-004", name: "James Wilson", licenseNumber: "WILS-804567-JW", phone: "+44 7700 900004", email: "james.w@haultrack.com", status: "active" },
+  { id: "DRV-005", name: "Emma Davis", licenseNumber: "DAVI-805678-ED", phone: "+44 7700 900005", email: "emma.d@haultrack.com", status: "active" },
+  { id: "DRV-006", name: "Robert Taylor", licenseNumber: "TAYL-806789-RT", phone: "+44 7700 900006", email: "robert.t@haultrack.com", status: "inactive" },
+  { id: "DRV-007", name: "Lisa Anderson", licenseNumber: "ANDE-807890-LA", phone: "+44 7700 900007", email: "lisa.a@haultrack.com", status: "inactive" },
+  { id: "DRV-008", name: "David Martinez", licenseNumber: "MART-808901-DM", phone: "+44 7700 900008", email: "david.m@haultrack.com", status: "active" },
+  { id: "DRV-009", name: "Karen White", licenseNumber: "WHIT-809012-KW", phone: "+44 7700 900009", email: "", status: "active" },
+  { id: "DRV-010", name: "Chris Harris", licenseNumber: "HARR-810123-CH", phone: "+44 7700 900010", email: "chris.h@haultrack.com", status: "active" },
+];
+
+export const initialJobs: Job[] = [
+  { id: "JOB-001", pickupLocation: "London", deliveryLocation: "Manchester", cargoDescription: "Electronic components, 5 pallets", expectedPickup: "2026-04-16T08:00", expectedDelivery: "2026-04-16T16:00", truckId: "TRK-002", driverId: "DRV-002", status: "in-progress", createdAt: "2026-04-15T10:00", notes: [{ id: "n1", text: "Loaded and departed on time", createdAt: "2026-04-16T08:30" }] },
+  { id: "JOB-002", pickupLocation: "Birmingham", deliveryLocation: "Leeds", cargoDescription: "Construction materials, steel beams", expectedPickup: "2026-04-16T07:00", expectedDelivery: "2026-04-16T14:00", truckId: "TRK-004", driverId: "DRV-003", status: "in-progress", createdAt: "2026-04-15T09:00", notes: [] },
+  { id: "JOB-003", pickupLocation: "Bristol", deliveryLocation: "Edinburgh", cargoDescription: "Frozen food delivery", expectedPickup: "2026-04-15T06:00", expectedDelivery: "2026-04-16T18:00", truckId: "TRK-007", driverId: "DRV-005", status: "in-progress", createdAt: "2026-04-14T15:00", notes: [{ id: "n2", text: "Temperature checked at rest stop", createdAt: "2026-04-15T12:00" }] },
+  { id: "JOB-004", pickupLocation: "Liverpool", deliveryLocation: "Newcastle", cargoDescription: "Auto parts shipment", expectedPickup: "2026-04-14T09:00", expectedDelivery: "2026-04-14T17:00", truckId: "TRK-001", driverId: "DRV-001", status: "completed", createdAt: "2026-04-13T14:00", notes: [{ id: "n3", text: "Delivered successfully, signed by warehouse manager", createdAt: "2026-04-14T16:30" }] },
+  { id: "JOB-005", pickupLocation: "Glasgow", deliveryLocation: "Cardiff", cargoDescription: "Textiles and fabric rolls", expectedPickup: "2026-04-13T08:00", expectedDelivery: "2026-04-14T12:00", truckId: "TRK-005", driverId: "DRV-004", status: "completed", createdAt: "2026-04-12T11:00", notes: [] },
+  { id: "JOB-006", pickupLocation: "Sheffield", deliveryLocation: "Nottingham", cargoDescription: "Office furniture, 12 desks + chairs", expectedPickup: "2026-04-17T09:00", expectedDelivery: "2026-04-17T14:00", truckId: null, driverId: null, status: "pending", createdAt: "2026-04-16T08:00", notes: [] },
+  { id: "JOB-007", pickupLocation: "Oxford", deliveryLocation: "Cambridge", cargoDescription: "Laboratory equipment", expectedPickup: "2026-04-17T10:00", expectedDelivery: "2026-04-17T15:00", truckId: null, driverId: null, status: "pending", createdAt: "2026-04-16T09:00", notes: [] },
+  { id: "JOB-008", pickupLocation: "Southampton", deliveryLocation: "Plymouth", cargoDescription: "Bulk grain delivery", expectedPickup: "2026-04-18T06:00", expectedDelivery: "2026-04-18T14:00", truckId: null, driverId: null, status: "pending", createdAt: "2026-04-16T10:00", notes: [] },
+  { id: "JOB-009", pickupLocation: "Norwich", deliveryLocation: "Dover", cargoDescription: "Pharmaceutical supplies", expectedPickup: "2026-04-12T08:00", expectedDelivery: "2026-04-12T13:00", truckId: "TRK-009", driverId: "DRV-008", status: "cancelled", createdAt: "2026-04-11T16:00", notes: [{ id: "n4", text: "Cancelled due to customer request", createdAt: "2026-04-12T07:00" }] },
+];

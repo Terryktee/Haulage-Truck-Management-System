@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 215 28% 17%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 17%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 17%;
+
+    --primary: 213 94% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 214 20% 94%;
+    --secondary-foreground: 215 28% 17%;
+
+    --muted: 214 20% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 214 20% 94%;
+    --accent-foreground: 215 28% 17%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 20% 90%;
+    --input: 214 20% 90%;
+    --ring: 213 94% 40%;
+
+    --radius: 0.625rem;
+
+    /* Status colors */
+    --status-available: 142 71% 45%;
+    --status-available-bg: 142 71% 95%;
+    --status-transit: 38 92% 50%;
+    --status-transit-bg: 38 92% 95%;
+    --status-maintenance: 0 72% 51%;
+    --status-maintenance-bg: 0 72% 95%;
+    --status-active: 142 71% 45%;
+    --status-inactive: 215 16% 47%;
+
+    /* Sidebar */
+    --sidebar-background: 215 28% 17%;
+    --sidebar-foreground: 214 20% 80%;
+    --sidebar-primary: 213 94% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 22%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 25% 24%;
+    --sidebar-ring: 213 94% 55%;
+
+    /* Custom */
+    --topbar: 0 0% 100%;
+    --topbar-foreground: 215 28% 17%;
+    --stat-shadow: 213 94% 40%;
+
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  h1, h2, h3 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .stat-card-shadow {
+    box-shadow: 0 1px 3px 0 hsl(var(--stat-shadow) / 0.06), 0 1px 2px -1px hsl(var(--stat-shadow) / 0.06);
+  }
+  .stat-card-shadow:hover {
+    box-shadow: 0 4px 12px -2px hsl(var(--stat-shadow) / 0.12), 0 2px 6px -2px hsl(var(--stat-shadow) / 0.08);
+  }
+}

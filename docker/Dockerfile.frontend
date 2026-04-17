@@ -1,0 +1,19 @@
+FROM node:21-alpine
+
+# Set working directory
+WORKDIR /frontend
+
+# Copy only dependency files first (better caching)
+COPY package.json package-lock.json* ./
+
+# Install dependencies
+RUN npm install
+
+# Copy rest of the app
+COPY . .
+
+# Expose port (React default)
+EXPOSE 3000
+
+# Start app
+CMD ["npm", "start"]
