@@ -1,0 +1,146 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@theme inline {
+  --font-sans: "Geist Variable", sans-serif;
+  --font-heading: "Space Grotesk", system-ui, sans-serif;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-status-available: hsl(var(--status-available));
+  --color-status-available-bg: hsl(var(--status-available-bg));
+  --color-status-transit: hsl(var(--status-transit));
+  --color-status-transit-bg: hsl(var(--status-transit-bg));
+  --color-status-maintenance: hsl(var(--status-maintenance));
+  --color-status-maintenance-bg: hsl(var(--status-maintenance-bg));
+  --color-status-active: hsl(var(--status-active));
+  --color-status-inactive: hsl(var(--status-inactive));
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 215 28% 17%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 17%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 17%;
+
+    --primary: 213 94% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 214 20% 94%;
+    --secondary-foreground: 215 28% 17%;
+
+    --muted: 214 20% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 214 20% 94%;
+    --accent-foreground: 215 28% 17%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 20% 90%;
+    --input: 214 20% 90%;
+    --ring: 213 94% 40%;
+
+    --radius: 0.625rem;
+
+    --status-available: 142 71% 45%;
+    --status-available-bg: 142 71% 95%;
+    --status-transit: 38 92% 50%;
+    --status-transit-bg: 38 92% 95%;
+    --status-maintenance: 0 72% 51%;
+    --status-maintenance-bg: 0 72% 95%;
+    --status-active: 142 71% 45%;
+    --status-inactive: 215 16% 47%;
+
+    --sidebar-background: 215 28% 17%;
+    --sidebar-foreground: 214 20% 80%;
+    --sidebar-primary: 213 94% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 22%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 25% 24%;
+    --sidebar-ring: 213 94% 55%;
+
+    --topbar: 0 0% 100%;
+    --topbar-foreground: 215 28% 17%;
+    --stat-shadow: 213 94% 40%;
+
+    font-family: "Inter", system-ui, sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .stat-card-shadow {
+    box-shadow:
+      0 1px 3px 0 hsl(var(--stat-shadow) / 0.06),
+      0 1px 2px -1px hsl(var(--stat-shadow) / 0.06);
+  }
+
+  .stat-card-shadow:hover {
+    box-shadow:
+      0 4px 12px -2px hsl(var(--stat-shadow) / 0.12),
+      0 2px 6px -2px hsl(var(--stat-shadow) / 0.08);
+  }
+}
