@@ -1,75 +1,142 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFleet } from "@/context/FleetContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-const truckTypes = [
-  { value: "flatbed", label: "Flatbed" },
-  { value: "tanker", label: "Tanker" },
-  { value: "refrigerated", label: "Refrigerated" },
-  { value: "box", label: "Box" },
-  { value: "curtainside", label: "Curtainside" },
-  { value: "tipper", label: "Tipper" },
-];
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const statuses = [
   { value: "available", label: "Available" },
-  { value: "in-transit", label: "In Transit" },
+  { value: "in_transit", label: "In Transit" },
   { value: "maintenance", label: "Under Maintenance" },
 ];
 
 export function TruckFormDialog({ open, onOpenChange, editTruckId }) {
-  const { addTruck, updateTruck, getTruckById } = useFleet();
+  const { addTruck, updateTruck, getTruckById, trucks } = useFleet();
+
   const editTruck = editTruckId ? getTruckById(editTruckId) : null;
 
-  const [registration, setRegistration] = useState(editTruck?.registration ?? "");
-  const [capacity, setCapacity] = useState(editTruck?.capacity?.toString() ?? "");
-  const [status, setStatus] = useState(editTruck?.status ?? "available");
-  const [type, setType] = useState(editTruck?.type ?? "flatbed");
-  const [model, setModel] = useState(editTruck?.model ?? "");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [capacity, setCapacity] = useState("");
+  const [status, setStatus] = useState("available");
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (editTruck) {
+      setRegistrationNumber(editTruck.registration_number || "");
+      setCapacity(editTruck.capacity?.toString() || "");
+      setStatus(editTruck.status || "available");
+    } else {
+      setRegistrationNumber("");
+      setCapacity("");
+      setStatus("available");
+    }
+
+    setErrors({});
+  }, [editTruck, open]);
 
   const validate = () => {
     const errs = {};
-    const regTrimmed = registration.trim();
-
-    if (!regTrimmed) errs.registration = "Registration is required";
-    else if (!/^[A-Za-z0-9\s-]+$/.test(regTrimmed))
-      errs.registration = "Only letters, numbers, spaces and dashes";
-
+    const regTrimmed = registrationNumber.trim();
     const cap = Number(capacity);
-    if (!capacity) errs.capacity = "Capacity is required";
-    else if (isNaN(cap) || cap < 1 || cap > 50)
-      errs.capacity = "Must be between 1 and 50 tons";
 
-    if (!model.trim()) errs.model = "Model is required";
+    if (!regTrimmed) {
+      errs.registration_number = "Registration number is required";
+    } else if (!/^[A-Za-z0-9\s-]+$/.test(regTrimmed)) {
+      errs.registration_number =
+        "Only letters, numbers, spaces and dashes are allowed";
+    } else {
+      const existingTruck = trucks.find(
+        (truck) =>
+          truck.registration_number === regTrimmed &&
+          truck.truck_id !== editTruck?.truck_id
+      );
+
+      if (existingTruck) {
+        errs.registration_number = "Registration number already exists";
+      }
+    }
+
+    if (!capacity) {
+      errs.capacity = "Capacity is required";
+    } else if (isNaN(cap) || cap <= 0) {
+      errs.capacity = "Capacity must be a valid number greater than 0";
+    }
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
 
-    const data = {
-      registration: registration.trim(),
-      capacity: Number(capacity),
+    const payload = {
+      registration_number: registrationNumber.trim(),
+      capacity: capacity.trim(),
       status,
-      type,
-      model: model.trim(),
-      year: new Date().getFullYear(),
     };
 
-    if (editTruck) {
-      updateTruck(editTruck.id, data);
-    } else {
-      addTruck(data);
-    }
+    try {
+      setSubmitting(true);
 
-    onOpenChange(false);
+      if (editTruck) {
+        await updateTruck(editTruck.truck_id, payload);
+      } else {
+        await addTruck(payload);
+      }
+
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to save truck:", error);
+
+      if (error.response?.data) {
+        const apiErrors = {};
+
+        if (error.response.data.registration_number) {
+          apiErrors.registration_number = Array.isArray(
+            error.response.data.registration_number
+          )
+            ? error.response.data.registration_number[0]
+            : error.response.data.registration_number;
+        }
+
+        if (error.response.data.capacity) {
+          apiErrors.capacity = Array.isArray(error.response.data.capacity)
+            ? error.response.data.capacity[0]
+            : error.response.data.capacity;
+        }
+
+        if (error.response.data.status) {
+          apiErrors.status = Array.isArray(error.response.data.status)
+            ? error.response.data.status[0]
+            : error.response.data.status;
+        }
+
+        if (Object.keys(apiErrors).length > 0) {
+          setErrors(apiErrors);
+          return;
+        }
+      }
+
+      setErrors({
+        general: "Failed to save truck. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -82,34 +149,42 @@ export function TruckFormDialog({ open, onOpenChange, editTruckId }) {
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
+          {errors.general && (
+            <p className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+              {errors.general}
+            </p>
+          )}
+
           <div>
-            <Label htmlFor="registration">Registration Number *</Label>
+            <Label htmlFor="registrationNumber">Registration Number *</Label>
             <Input
-              id="registration"
-              value={registration}
-              onChange={(e) => setRegistration(e.target.value)}
-              placeholder="e.g. AB 1234 CD"
+              id="registrationNumber"
+              value={registrationNumber}
+              onChange={(e) => setRegistrationNumber(e.target.value)}
+              placeholder="e.g. N02349220"
+              disabled={submitting}
             />
-            {errors.registration && (
-              <p className="text-xs text-destructive mt-1">
-                {errors.registration}
+            {errors.registration_number && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.registration_number}
               </p>
             )}
           </div>
 
           <div>
-            <Label htmlFor="capacity">Capacity (tons) *</Label>
+            <Label htmlFor="capacity">Capacity *</Label>
             <Input
               id="capacity"
               type="number"
-              min={1}
-              max={50}
+              min="0"
+              step="0.01"
               value={capacity}
               onChange={(e) => setCapacity(e.target.value)}
-              placeholder="1-50"
+              placeholder="e.g. 400.00"
+              disabled={submitting}
             />
             {errors.capacity && (
-              <p className="text-xs text-destructive mt-1">
+              <p className="mt-1 text-xs text-destructive">
                 {errors.capacity}
               </p>
             )}
@@ -117,57 +192,43 @@ export function TruckFormDialog({ open, onOpenChange, editTruckId }) {
 
           <div>
             <Label>Status</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v)}>
+            <Select
+              value={status}
+              onValueChange={setStatus}
+              disabled={submitting}
+            >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder="Select truck status" />
               </SelectTrigger>
               <SelectContent>
-                {statuses.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
+                {statuses.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div>
-            <Label>Truck Type</Label>
-            <Select value={type} onValueChange={(v) => setType(v)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {truckTypes.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="model">Model *</Label>
-            <Input
-              id="model"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              placeholder="e.g. Volvo FH16"
-            />
-            {errors.model && (
-              <p className="text-xs text-destructive mt-1">
-                {errors.model}
+            {errors.status && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.status}
               </p>
             )}
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+            >
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>
-              {editTruck ? "Save Changes" : "Add Truck"}
+            <Button onClick={handleSubmit} disabled={submitting}>
+              {submitting
+                ? "Saving..."
+                : editTruck
+                ? "Save Changes"
+                : "Add Truck"}
             </Button>
           </div>
         </div>

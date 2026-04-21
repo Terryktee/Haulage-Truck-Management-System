@@ -1,45 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useFleet } from "@/context/FleetContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Check, ChevronRight, AlertTriangle } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArrowLeft, Check, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import api from "@/api/axios";
 
 export default function CreateJobPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { addJob, trucks, drivers, getActiveJobsForDriver } = useFleet();
+
   const [step, setStep] = useState(1);
 
-  // Step 1
   const [pickup, setPickup] = useState("");
   const [delivery, setDelivery] = useState("");
   const [cargo, setCargo] = useState("");
-  const [pickupDate, setPickupDate] = useState("");
-  const [deliveryDate, setDeliveryDate] = useState("");
 
-  // Step 2
   const [truckId, setTruckId] = useState("");
   const [driverId, setDriverId] = useState("");
 
+  const [trucks, setTrucks] = useState([]);
+  const [drivers, setDrivers] = useState([]);
+  const [jobs, setJobs] = useState([]);
+
   const [errors, setErrors] = useState({});
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [trucksRes, driversRes, jobsRes] = await Promise.all([
+        api.get("/trucks/"),
+        api.get("/drivers"),
+        api.get("/jobs/"),
+      ]);
+
+      setTrucks(trucksRes.data);
+      setDrivers(driversRes.data);
+      setJobs(jobsRes.data);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+    }
+  };
+
+  // Available trucks (only available ones)
   const availableTrucks = trucks.filter((t) => t.status === "available");
 
-  const availableDrivers = drivers.filter((d) => {
-    if (d.status !== "active") return false;
-    const activeJobs = getActiveJobsForDriver(d.id);
-    return activeJobs.length === 0;
-  });
-
-  const busyDrivers = drivers.filter((d) => {
-    if (d.status !== "active") return false;
-    return getActiveJobsForDriver(d.id).length > 0;
-  });
+  // Driver availability = no active job
+  const isDriverBusy = (driverId) => {
+    return jobs.some(
+      (j) =>
+        j.assigned_driver === driverId &&
+        j.status !== "completed" &&
+        j.status !== "cancelled"
+    );
+  };
 
   const validateStep1 = () => {
     const errs = {};
@@ -56,20 +82,27 @@ export default function CreateJobPage() {
     else if (step === 2) setStep(3);
   };
 
-  const handleSubmit = () => {
-    addJob({
-      pickupLocation: pickup.trim(),
-      deliveryLocation: delivery.trim(),
-      cargoDescription: cargo.trim(),
-      expectedPickup: pickupDate || new Date().toISOString(),
-      expectedDelivery: deliveryDate || new Date().toISOString(),
-      truckId: truckId && truckId !== "none" ? truckId : null,
-      driverId: driverId && driverId !== "none" ? driverId : null,
-      status: "pending",
-    });
+  const handleSubmit = async () => {
+    try {
+      await api.post("/jobs/", {
+        pickup_location: pickup.trim(),
+        delivery_location: delivery.trim(),
+        cargo_description: cargo.trim(),
+        assigned_truck: truckId && truckId !== "none" ? Number(truckId) : null,
+        assigned_driver: driverId && driverId !== "none" ? Number(driverId) : null,
+        status: "pending",
+      });
 
-    toast({ title: "Job created successfully" });
-    navigate("/jobs");
+      toast({ title: "Job created successfully" });
+      navigate("/jobs");
+    } catch (error) {
+      console.error("Failed to create job:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create job",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -87,78 +120,27 @@ export default function CreateJobPage() {
         </div>
       </div>
 
-      {/* Progress */}
-      <div className="flex items-center gap-2">
-        {["Job Details", "Assignment", "Review"].map((label, i) => (
-          <div key={label} className="flex items-center gap-2">
-            <div
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${
-                i + 1 < step
-                  ? "bg-status-available text-primary-foreground"
-                  : i + 1 === step
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-muted-foreground"
-              }`}
-            >
-              {i + 1 < step ? <Check className="h-4 w-4" /> : i + 1}
-            </div>
-
-            <span
-              className={`text-sm hidden sm:block ${
-                i + 1 === step ? "font-medium" : "text-muted-foreground"
-              }`}
-            >
-              {label}
-            </span>
-
-            {i < 2 && (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            )}
-          </div>
-        ))}
-      </div>
-
+      {/* Step Content */}
       <div className="rounded-xl border bg-card p-6">
         {/* STEP 1 */}
         {step === 1 && (
           <div className="space-y-4">
             <div>
               <Label>Pickup Location *</Label>
-              <Input
-                value={pickup}
-                onChange={(e) => setPickup(e.target.value)}
-              />
-              {errors.pickup && (
-                <p className="text-xs text-destructive mt-1">
-                  {errors.pickup}
-                </p>
-              )}
+              <Input value={pickup} onChange={(e) => setPickup(e.target.value)} />
+              {errors.pickup && <p className="text-xs text-destructive">{errors.pickup}</p>}
             </div>
 
             <div>
               <Label>Delivery Location *</Label>
-              <Input
-                value={delivery}
-                onChange={(e) => setDelivery(e.target.value)}
-              />
-              {errors.delivery && (
-                <p className="text-xs text-destructive mt-1">
-                  {errors.delivery}
-                </p>
-              )}
+              <Input value={delivery} onChange={(e) => setDelivery(e.target.value)} />
+              {errors.delivery && <p className="text-xs text-destructive">{errors.delivery}</p>}
             </div>
 
             <div>
               <Label>Cargo Description *</Label>
-              <Textarea
-                value={cargo}
-                onChange={(e) => setCargo(e.target.value)}
-              />
-              {errors.cargo && (
-                <p className="text-xs text-destructive mt-1">
-                  {errors.cargo}
-                </p>
-              )}
+              <Textarea value={cargo} onChange={(e) => setCargo(e.target.value)} />
+              {errors.cargo && <p className="text-xs text-destructive">{errors.cargo}</p>}
             </div>
           </div>
         )}
@@ -175,8 +157,8 @@ export default function CreateJobPage() {
                 <SelectContent>
                   <SelectItem value="none">Unassigned</SelectItem>
                   {availableTrucks.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.registration}
+                    <SelectItem key={t.truck_id} value={String(t.truck_id)}>
+                      {t.registration_number}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -191,16 +173,20 @@ export default function CreateJobPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Unassigned</SelectItem>
-                  {availableDrivers.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>
-                      {d.name}
-                    </SelectItem>
-                  ))}
-                  {busyDrivers.map((d) => (
-                    <SelectItem key={d.id} value={d.id} disabled>
-                      {d.name} — busy
-                    </SelectItem>
-                  ))}
+
+                  {drivers.map((d) => {
+                    const busy = isDriverBusy(d.driver_id);
+
+                    return (
+                      <SelectItem
+                        key={d.driver_id}
+                        value={String(d.driver_id)}
+                        disabled={busy}
+                      >
+                        {d.name} {busy ? "— busy" : ""}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -211,7 +197,9 @@ export default function CreateJobPage() {
         {step === 3 && (
           <div>
             <h3 className="font-display font-semibold">Review</h3>
-            <p className="text-sm">{pickup} → {delivery}</p>
+            <p className="text-sm">
+              {pickup} → {delivery}
+            </p>
           </div>
         )}
 
@@ -219,9 +207,7 @@ export default function CreateJobPage() {
         <div className="flex justify-between pt-6">
           <Button
             variant="outline"
-            onClick={() =>
-              step > 1 ? setStep(step - 1) : navigate("/jobs")
-            }
+            onClick={() => (step > 1 ? setStep(step - 1) : navigate("/jobs"))}
           >
             {step === 1 ? "Cancel" : "Back"}
           </Button>

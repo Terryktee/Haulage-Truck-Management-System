@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-bv24f*f=dft2ge32-(vip--5dea^=jhkvgkzldg@w@iqa7ltqy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'apps.drivers',
     'apps.jobs',
     'apps.trucks',
-    'apps.users',
     'corsheaders',
 ]
 
@@ -63,8 +62,8 @@ REST_FRAMEWORK = {
    # "DEFAULT_PERMISSION_CLASSES": (
     #    "rest_framework.permissions.IsAuthenticated",
     #),
-    # DEFAULT_PAGINATION_CLASS": "common.pagination.DefaultPagination",
-    # "PAGE_SIZE": 10,
+    #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    #'PAGE_SIZE': 10,
 }
 
 
@@ -118,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:5173",
 ]
 
 

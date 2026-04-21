@@ -29,5 +29,5 @@ urlpatterns = [
     
     path('api/trucks/',include('apps.trucks.urls')),
     path('api/jobs/',include('apps.jobs.urls')),
-    path('api/drivers',include('apps.drivers.urls'))
+    path('api/drivers/',include('apps.drivers.urls'))
 ]

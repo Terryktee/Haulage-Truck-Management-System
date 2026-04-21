@@ -1,69 +1,132 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFleet } from "@/context/FleetContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 
 export function DriverFormDialog({ open, onOpenChange, editDriverId }) {
   const { addDriver, updateDriver, getDriverById, drivers } = useFleet();
+
   const editDriver = editDriverId ? getDriverById(editDriverId) : null;
 
-  const [name, setName] = useState(editDriver?.name ?? "");
-  const [license, setLicense] = useState(editDriver?.licenseNumber ?? "");
-  const [phone, setPhone] = useState(editDriver?.phone ?? "");
-  const [email, setEmail] = useState(editDriver?.email ?? "");
-  const [active, setActive] = useState(editDriver?.status === "active" || !editDriver);
+  const [name, setName] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (editDriver) {
+      setName(editDriver.name || "");
+      setLicenseNumber(editDriver.license_number || "");
+      setPhoneNumber(editDriver.phone_number || "");
+    } else {
+      setName("");
+      setLicenseNumber("");
+      setPhoneNumber("");
+    }
+
+    setErrors({});
+  }, [editDriver, open]);
 
   const validate = () => {
     const errs = {};
-    const nameTrimmed = name.trim();
 
-    if (!nameTrimmed) errs.name = "Name is required";
-    else if (nameTrimmed.split(/\s+/).length < 2) errs.name = "Full name required (at least 2 words)";
+    const trimmedName = name.trim();
+    const trimmedLicense = licenseNumber.trim();
+    const trimmedPhone = phoneNumber.trim();
 
-    const licenseTrimmed = license.trim();
-    if (!licenseTrimmed) {
-      errs.license = "License number is required";
-    } else {
-      const existing = drivers.find(
-        (d) => d.licenseNumber === licenseTrimmed && d.id !== editDriver?.id
-      );
-      if (existing) errs.license = "License number already exists";
+    if (!trimmedName) {
+      errs.name = "Name is required";
+    } else if (trimmedName.split(/\s+/).length < 2) {
+      errs.name = "Full name required (at least 2 words)";
     }
 
-    const phoneTrimmed = phone.trim();
-    if (!phoneTrimmed) errs.phone = "Phone number is required";
-    else if (!/^\+?[\d\s()-]{7,20}$/.test(phoneTrimmed)) errs.phone = "Invalid phone format";
+    if (!trimmedLicense) {
+      errs.license_number = "License number is required";
+    } else {
+      const existingDriver = drivers.find(
+        (driver) =>
+          driver.license_number === trimmedLicense &&
+          driver.driver_id !== editDriver?.driver_id
+      );
 
-    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      errs.email = "Invalid email format";
+      if (existingDriver) {
+        errs.license_number = "License number already exists";
+      }
+    }
+
+    if (!trimmedPhone) {
+      errs.phone_number = "Phone number is required";
+    } else if (!/^\+?[\d\s()-]{7,20}$/.test(trimmedPhone)) {
+      errs.phone_number = "Invalid phone format";
     }
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
 
-    const data = {
+    const payload = {
       name: name.trim(),
-      licenseNumber: license.trim(),
-      phone: phone.trim(),
-      email: email.trim(),
-      status: active ? "active" : "inactive",
+      license_number: licenseNumber.trim(),
+      phone_number: phoneNumber.trim(),
     };
 
-    if (editDriver) {
-      updateDriver(editDriver.id, data);
-    } else {
-      addDriver(data);
-    }
+    try {
+      setSubmitting(true);
 
-    onOpenChange(false);
+      if (editDriver) {
+        await updateDriver(editDriver.driver_id, payload);
+      } else {
+        await addDriver(payload);
+      }
+
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to save driver:", error);
+
+      if (error.response?.data) {
+        const apiErrors = {};
+
+        if (error.response.data.name) {
+          apiErrors.name = Array.isArray(error.response.data.name)
+            ? error.response.data.name[0]
+            : error.response.data.name;
+        }
+
+        if (error.response.data.license_number) {
+          apiErrors.license_number = Array.isArray(error.response.data.license_number)
+            ? error.response.data.license_number[0]
+            : error.response.data.license_number;
+        }
+
+        if (error.response.data.phone_number) {
+          apiErrors.phone_number = Array.isArray(error.response.data.phone_number)
+            ? error.response.data.phone_number[0]
+            : error.response.data.phone_number;
+        }
+
+        if (Object.keys(apiErrors).length > 0) {
+          setErrors(apiErrors);
+          return;
+        }
+      }
+
+      setErrors({
+        general: "Failed to save driver. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -76,62 +139,72 @@ export function DriverFormDialog({ open, onOpenChange, editDriverId }) {
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
+          {errors.general && (
+            <p className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+              {errors.general}
+            </p>
+          )}
+
           <div>
             <Label htmlFor="driverName">Full Name *</Label>
             <Input
               id="driverName"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. John Smith"
+              placeholder="e.g. Tawanda Kapumha"
+              disabled={submitting}
             />
-            {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
+            {errors.name && (
+              <p className="mt-1 text-xs text-destructive">{errors.name}</p>
+            )}
           </div>
 
           <div>
-            <Label htmlFor="license">License Number *</Label>
+            <Label htmlFor="licenseNumber">License Number *</Label>
             <Input
-              id="license"
-              value={license}
-              onChange={(e) => setLicense(e.target.value)}
-              placeholder="e.g. SMIT-801234-JS"
+              id="licenseNumber"
+              value={licenseNumber}
+              onChange={(e) => setLicenseNumber(e.target.value)}
+              placeholder="e.g. 738-ABC"
+              disabled={submitting}
             />
-            {errors.license && <p className="text-xs text-destructive mt-1">{errors.license}</p>}
+            {errors.license_number && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.license_number}
+              </p>
+            )}
           </div>
 
           <div>
-            <Label htmlFor="phone">Phone Number *</Label>
+            <Label htmlFor="phoneNumber">Phone Number *</Label>
             <Input
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+44 7700 900000"
+              id="phoneNumber"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="e.g. 45787981209"
+              disabled={submitting}
             />
-            {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="email">Email (optional)</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="john@example.com"
-            />
-            {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
-          </div>
-
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <Label htmlFor="active-toggle">Active Status</Label>
-            <Switch id="active-toggle" checked={active} onCheckedChange={setActive} />
+            {errors.phone_number && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.phone_number}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+            >
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>
-              {editDriver ? "Save Changes" : "Add Driver"}
+            <Button onClick={handleSubmit} disabled={submitting}>
+              {submitting
+                ? "Saving..."
+                : editDriver
+                ? "Save Changes"
+                : "Add Driver"}
             </Button>
           </div>
         </div>

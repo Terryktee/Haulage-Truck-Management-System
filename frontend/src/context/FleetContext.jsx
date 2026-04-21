@@ -1,61 +1,119 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { initialTrucks, initialDrivers, initialJobs } from "@/data/mockData";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
+import axios from "axios";
+import { initialJobs } from "@/data/mockData";
 
 const FleetContext = createContext(null);
 
-let truckCounter = 13;
-let driverCounter = 11;
-let jobCounter = 10;
+const api = axios.create({
+  baseURL: "http://127.0.0.1:8000/api",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 
 export function FleetProvider({ children }) {
-  const [trucks, setTrucks] = useState(initialTrucks);
-  const [drivers, setDrivers] = useState(initialDrivers);
+  const [trucks, setTrucks] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [jobs, setJobs] = useState(initialJobs);
+  const [loading, setLoading] = useState(false);
 
-  const addTruck = useCallback((truck) => {
-    const id = `TRK-${String(truckCounter++).padStart(3, "0")}`;
-    setTrucks((prev) => [...prev, { ...truck, id }]);
+  const fetchTrucks = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/trucks/");
+      setTrucks(response.data);
+    } catch (error) {
+      console.error("Failed to fetch trucks:", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const updateTruck = useCallback((id, data) => {
-    setTrucks((prev) => prev.map((t) => (t.id === id ? { ...t, ...data } : t)));
+  const fetchDrivers = useCallback(async () => {
+    try {
+      const response = await api.get("/drivers/");
+      setDrivers(response.data);
+    } catch (error) {
+      console.error("Failed to fetch drivers:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTrucks();
+    fetchDrivers();
+  }, [fetchTrucks, fetchDrivers]);
+
+  const addTruck = useCallback(async (truck) => {
+    const response = await api.post("/trucks/", truck);
+    setTrucks((prev) => [...prev, response.data]);
+    return response.data;
+  }, []);
+
+  const updateTruck = useCallback(async (truckId, data) => {
+    const response = await api.put(`/trucks/${truckId}/`, data);
+    setTrucks((prev) =>
+      prev.map((t) => (t.truck_id === truckId ? response.data : t))
+    );
+    return response.data;
   }, []);
 
   const deleteTruck = useCallback(
-    (id) => {
+    async (truckId) => {
       const activeJobs = jobs.filter(
-        (j) => j.truckId === id && (j.status === "pending" || j.status === "in-progress")
+        (j) =>
+          j.truckId === truckId &&
+          (j.status === "pending" || j.status === "in-progress")
       );
+
       if (activeJobs.length > 0) return false;
-      setTrucks((prev) => prev.filter((t) => t.id !== id));
+
+      await api.delete(`/trucks/${truckId}/`);
+      setTrucks((prev) => prev.filter((t) => t.truck_id !== truckId));
       return true;
     },
     [jobs]
   );
 
-  const addDriver = useCallback((driver) => {
-    const id = `DRV-${String(driverCounter++).padStart(3, "0")}`;
-    setDrivers((prev) => [...prev, { ...driver, id }]);
+  const addDriver = useCallback(async (driver) => {
+    const response = await api.post("/drivers/", driver);
+    setDrivers((prev) => [...prev, response.data]);
+    return response.data;
   }, []);
 
-  const updateDriver = useCallback((id, data) => {
-    setDrivers((prev) => prev.map((d) => (d.id === id ? { ...d, ...data } : d)));
+  const updateDriver = useCallback(async (driverId, data) => {
+    const response = await api.put(`/drivers/${driverId}/`, data);
+    setDrivers((prev) =>
+      prev.map((d) => (d.driver_id === driverId ? response.data : d))
+    );
+    return response.data;
   }, []);
 
   const deleteDriver = useCallback(
-    (id) => {
+    async (driverId) => {
       const activeJobs = jobs.filter(
-        (j) => j.driverId === id && (j.status === "pending" || j.status === "in-progress")
+        (j) =>
+          j.driverId === driverId &&
+          (j.status === "pending" || j.status === "in-progress")
       );
+
       if (activeJobs.length > 0) return false;
-      setDrivers((prev) => prev.filter((d) => d.id !== id));
+
+      await api.delete(`/drivers/${driverId}/`);
+      setDrivers((prev) => prev.filter((d) => d.driver_id !== driverId));
       return true;
     },
     [jobs]
   );
 
   const addJob = useCallback((job) => {
-    const id = `JOB-${String(jobCounter++).padStart(3, "0")}`;
+    const id = `JOB-${Date.now()}`;
     setJobs((prev) => [
       ...prev,
       { ...job, id, createdAt: new Date().toISOString(), notes: [] },
@@ -64,7 +122,7 @@ export function FleetProvider({ children }) {
     if (job.truckId && job.status === "in-progress") {
       setTrucks((prev) =>
         prev.map((t) =>
-          t.id === job.truckId ? { ...t, status: "in-transit" } : t
+          t.truck_id === job.truckId ? { ...t, status: "in_transit" } : t
         )
       );
     }
@@ -82,7 +140,7 @@ export function FleetProvider({ children }) {
       if ((status === "completed" || status === "cancelled") && job.truckId) {
         setTrucks((pt) =>
           pt.map((t) =>
-            t.id === job.truckId ? { ...t, status: "available" } : t
+            t.truck_id === job.truckId ? { ...t, status: "available" } : t
           )
         );
       }
@@ -90,7 +148,7 @@ export function FleetProvider({ children }) {
       if (status === "in-progress" && job.truckId) {
         setTrucks((pt) =>
           pt.map((t) =>
-            t.id === job.truckId ? { ...t, status: "in-transit" } : t
+            t.truck_id === job.truckId ? { ...t, status: "in_transit" } : t
           )
         );
       }
@@ -137,7 +195,7 @@ export function FleetProvider({ children }) {
     );
 
     return drivers.filter(
-      (d) => d.status === "active" && !busyDriverIds.has(d.id)
+      (d) => !busyDriverIds.has(d.driver_id)
     );
   }, [drivers, jobs]);
 
@@ -172,12 +230,12 @@ export function FleetProvider({ children }) {
   );
 
   const getTruckById = useCallback(
-    (id) => trucks.find((t) => t.id === id),
+    (id) => trucks.find((t) => t.truck_id === id),
     [trucks]
   );
 
   const getDriverById = useCallback(
-    (id) => drivers.find((d) => d.id === id),
+    (id) => drivers.find((d) => d.driver_id === id),
     [drivers]
   );
 
@@ -192,6 +250,9 @@ export function FleetProvider({ children }) {
         trucks,
         drivers,
         jobs,
+        loading,
+        fetchTrucks,
+        fetchDrivers,
         addTruck,
         updateTruck,
         deleteTruck,
