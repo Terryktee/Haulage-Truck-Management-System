@@ -100,7 +100,7 @@ The following business rules were implemented:
 - Only **pending** jobs can be deleted
 
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Trucks
 ```bash
@@ -157,7 +157,7 @@ Once enabled:
 * The frontend will require further integration to connect with the authentication API and paginated endpoints
 
 
-## ✅ Bonus Features Status
+## Bonus Features Status
 
 ### Implemented on Backend
 
