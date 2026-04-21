@@ -218,8 +218,9 @@ cd hellmary
 ```
 
 ### 2. Run with Docker
-
+Docker is run in the docker folder
 ```bash
+cd docker
 docker-compose up --build
 ```
 
