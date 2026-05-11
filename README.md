@@ -1,296 +1,273 @@
+<div align="center">
 
-# Haulage Truck Management System
+# 🚛 HellMary — Haulage Truck Management System
 
-A full-stack Haulage Truck Management System built for the **Marytechenock Solutions Technical Assessment**.  
-The system simulates real-world logistics operations by managing trucks, drivers, and delivery jobs while enforcing practical business rules.
+**A full-stack logistics management platform for real-world fleet operations**
 
-## Overview
+[![Django](https://img.shields.io/badge/Backend-Django_REST_Framework-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.django-rest-framework.org/)
+[![React](https://img.shields.io/badge/Frontend-React_+_Vite-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Styling-Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Docker](https://img.shields.io/badge/DevOps-Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 
-This project was built using a **monolith architecture** with:
+</div>
 
-- **Backend:** Django + Django REST Framework
-- **Frontend:** React (Vite) + Tailwind CSS + shadcn/ui
-- **Database:** SQLite
-- **Containerization:** Docker + Docker Compose
+---
 
-The application supports management of:
+## 📖 Overview
 
-- Trucks
-- Drivers
-- Delivery Jobs
+**HellMary** is a full-stack Haulage Truck Management System built for the **Marytechenock Solutions Technical Assessment**. It simulates real-world logistics operations by managing trucks, drivers, and delivery jobs — while enforcing practical business rules around availability, assignment, and job lifecycle.
 
-It also enforces key logistics business rules such as truck availability, single active job per driver, and job-driven truck status updates.
+Built using a **monolith architecture**, the system exposes a clean REST API consumed by a modern React frontend.
 
+---
 
-## Tech Stack
+## ✨ Features at a Glance
 
-### Backend
-- Django
-- Django REST Framework
-- SQLite
+| Module | Capabilities |
+|---|---|
+| 🚚 **Truck Management** | Register, update, view, and delete trucks with real-time status tracking |
+| 👤 **Driver Management** | Full CRUD for drivers with license and contact details |
+| 📦 **Job / Delivery Management** | Create jobs, assign trucks and drivers, track delivery status end-to-end |
+| ⚙️ **Business Rule Enforcement** | Prevent invalid assignments and enforce job lifecycle constraints |
+| 🔐 **Authentication** *(backend-ready)* | Token-based auth implemented; frontend integration pending |
+| 📄 **Pagination** *(backend-ready)* | Configurable pagination; frontend integration pending |
 
-### Frontend
-- React
-- Vite
-- Tailwind CSS
-- shadcn/ui
+---
 
-### DevOps
-- Docker
-- Docker Compose
+## 🏗️ Tech Stack
 
-### Architecture
-- Monolith Architecture
-
-
-## Core Features
-
-### 1. Truck Management
-- Register trucks
-- Update trucks
-- View trucks
-- Delete trucks
-
-**Truck Fields**
-- Truck ID
-- Registration Number
-- Capacity
-- Status
-
-
-### 2. Driver Management
-- Create drivers
-- Update drivers
-- View drivers
-- Delete drivers
-
-**Driver Fields**
-- Driver ID
-- Name
-- License Number
-- Phone Number
-
-
-### 3. Job / Delivery Management
-- Create delivery jobs
-- Assign truck and driver
-- Update job status
-- View jobs
-- Delete jobs
-
-**Job Fields**
-- Job ID
-- Pickup Location
-- Delivery Location
-- Cargo Description
-- Status
-- Assigned Truck
-- Assigned Driver
-
-
-## Business Rules
-
-The following business rules were implemented:
-
-- Trucks cannot be assigned if they are already **in transit**
-- Trucks cannot be assigned if they are under **maintenance**
-- Drivers cannot have **multiple active jobs**
-- Job status affects truck availability
-- A job cannot be assigned unless both a **truck** and **driver** are selected
-- Only **pending** jobs can be deleted
-
-
-## API Endpoints
-
-### Trucks
-```bash
-GET    /api/trucks/
-POST   /api/trucks/
-GET    /api/trucks/{id}/
-PUT    /api/trucks/{id}/
-DELETE /api/trucks/{id}/
-````
-
-### Drivers
-
-```bash
-GET    /api/drivers/
-POST   /api/drivers/
-GET    /api/drivers/{id}/
-PUT    /api/drivers/{id}/
-DELETE /api/drivers/{id}/
+```
+┌──────────────────────────────────────────────────────┐
+│                      Frontend                        │
+│         React  •  Vite  •  Tailwind CSS  •  shadcn/ui│
+├──────────────────────────────────────────────────────┤
+│                      Backend                         │
+│            Django  •  Django REST Framework          │
+├──────────────────────────────────────────────────────┤
+│                     Database                         │
+│                        SQLite                        │
+├──────────────────────────────────────────────────────┤
+│                    Infrastructure                    │
+│                 Docker  •  Docker Compose            │
+└──────────────────────────────────────────────────────┘
 ```
 
-### Jobs
+---
 
-```bash
-GET    /api/jobs/
-POST   /api/jobs/
-GET    /api/jobs/{id}/
-PATCH  /api/jobs/{id}/
-DELETE /api/jobs/{id}/
+## 🔗 API Reference
+
+### 🚛 Trucks
+```http
+GET    /api/trucks/          → List all trucks
+POST   /api/trucks/          → Register a new truck
+GET    /api/trucks/{id}/     → Retrieve a truck
+PUT    /api/trucks/{id}/     → Update a truck
+DELETE /api/trucks/{id}/     → Delete a truck
 ```
 
-
-## Frontend Notes
-
-The frontend currently supports:
-
-* Truck management
-* Driver management
-* Job management
-* Assignment flows
-* Validation and manual testing of business logic
-
-### Important Note on Bonus Features
-
-**Authentication** and **pagination** were added on the backend, but not yet integrated into the frontend.
-
-To enable them on the backend:
-
-* Go to **settings**
-* Uncomment / unhighlight the relevant authentication and pagination configuration
-
-Once enabled:
-
-* The backend API will support authentication and pagination
-* The frontend will require further integration to connect with the authentication API and paginated endpoints
-
-
-## Bonus Features Status
-
-### Implemented on Backend
-
-* Authentication
-* Pagination
-
-### Not Yet Implemented
-
-* Logging
-* Unit Tests
-
-### Frontend Status
-
-* Authentication not yet connected
-* Pagination not yet integrated
-
-
-## Testing
-
-The project was tested using:
-
-* **API Testing**
-* **Manual Testing through the frontend**
-
-This was used to verify:
-
-* CRUD operations
-* Assignment workflow
-* Business rule enforcement
-* Status updates
-* Validation behavior
-
-
-## Folder Structure
-
-```bash
-HellMary/
-│
-├── .env.development
-├── .gitignore
-├── README.md
-│
-├── backend/
-│
-├── docker/
-│
-└── frontend/
+### 👤 Drivers
+```http
+GET    /api/drivers/         → List all drivers
+POST   /api/drivers/         → Create a driver
+GET    /api/drivers/{id}/    → Retrieve a driver
+PUT    /api/drivers/{id}/    → Update a driver
+DELETE /api/drivers/{id}/    → Delete a driver
 ```
 
+### 📦 Jobs
+```http
+GET    /api/jobs/            → List all jobs
+POST   /api/jobs/            → Create a delivery job
+GET    /api/jobs/{id}/       → Retrieve a job
+PATCH  /api/jobs/{id}/       → Update job status
+DELETE /api/jobs/{id}/       → Delete a job
+```
 
-## Running the Project
+---
 
-### 1. Clone the repository
+## 📐 Data Models
+
+<details>
+<summary><strong>🚚 Truck</strong></summary>
+
+| Field | Type | Description |
+|---|---|---|
+| `truck_id` | UUID / Integer | Unique identifier |
+| `registration_number` | String | Vehicle registration plate |
+| `capacity` | Decimal | Load capacity |
+| `status` | Enum | `available` · `in_transit` · `maintenance` |
+
+</details>
+
+<details>
+<summary><strong>👤 Driver</strong></summary>
+
+| Field | Type | Description |
+|---|---|---|
+| `driver_id` | UUID / Integer | Unique identifier |
+| `name` | String | Full name |
+| `license_number` | String | Driver's license |
+| `phone_number` | String | Contact number |
+
+</details>
+
+<details>
+<summary><strong>📦 Job</strong></summary>
+
+| Field | Type | Description |
+|---|---|---|
+| `job_id` | UUID / Integer | Unique identifier |
+| `pickup_location` | String | Origin address |
+| `delivery_location` | String | Destination address |
+| `cargo_description` | String | Details of the cargo |
+| `status` | Enum | `pending` · `in_progress` · `completed` |
+| `assigned_truck` | FK | Linked truck |
+| `assigned_driver` | FK | Linked driver |
+
+</details>
+
+---
+
+## 🛡️ Business Rules
+
+The following constraints are enforced at the API level:
+
+- 🚫 **Trucks in transit** cannot be assigned to a new job
+- 🚫 **Trucks under maintenance** cannot be assigned to any job
+- 🚫 **Drivers with an active job** cannot be assigned to another
+- ✅ **Both truck and driver** must be selected to create a job assignment
+- 🗑️ **Only pending jobs** can be deleted
+- 🔄 **Job status changes** automatically update truck availability
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/your-username/hellmary.git
 cd hellmary
 ```
 
-### 2. Run with Docker
-Docker is run in the docker folder
+### 2. Build and Run
+
 ```bash
 cd docker
 docker-compose up --build
 ```
 
-### 3. Access the project
+### 3. Access the Application
 
-* Frontend: `http://localhost:5173`
-* Backend API: `http://localhost:8000/api/`
-* Django Admin: `http://localhost:8000/admin/`
+| Service | URL |
+|---|---|
+| 🌐 Frontend | http://localhost:5173 |
+| ⚙️ Backend API | http://localhost:8000/api/ |
+| 🔧 Django Admin | http://localhost:8000/admin/ |
 
+---
 
-## Database
+## 🔐 Enabling Auth & Pagination (Backend)
 
-This project uses **SQLite** for simplicity and faster local setup during the technical assessment.
+Authentication and pagination are implemented on the backend but disabled by default. To enable them:
 
-Although PostgreSQL was preferred in the assessment brief, SQLite was used to keep development and testing lightweight and efficient.
+1. Open `backend/settings.py`
+2. Uncomment the **authentication** and **pagination** configuration blocks
+3. Restart the backend service
 
+> ⚠️ The frontend does not yet integrate with these features. Further development is required to connect the auth flow and paginated endpoints.
 
-## Design Approach
+---
 
-This project follows a **monolith architecture**, where backend logic, business rules, and API management are handled within a single Django application structure, while the frontend consumes the exposed REST APIs.
+## 📁 Project Structure
 
-This approach was suitable for:
+```
+HellMary/
+│
+├── .env.development        # Environment variables
+├── .gitignore
+├── README.md
+│
+├── backend/                # Django application
+│   ├── api/                # REST API (trucks, drivers, jobs)
+│   ├── settings.py
+│   └── ...
+│
+├── docker/                 # Docker configuration
+│   └── docker-compose.yml
+│
+└── frontend/               # React + Vite application
+    ├── src/
+    └── ...
+```
 
-* Faster development
-* Easier local testing
-* Simpler project structure for assessment delivery
+---
 
+## ✅ Feature Status
 
-## Future Improvements
+| Feature | Backend | Frontend |
+|---|---|---|
+| Truck CRUD | ✅ Complete | ✅ Complete |
+| Driver CRUD | ✅ Complete | ✅ Complete |
+| Job Management | ✅ Complete | ✅ Complete |
+| Assignment Flow | ✅ Complete | ✅ Complete |
+| Business Rule Enforcement | ✅ Complete | ✅ Complete |
+| Authentication | ✅ Implemented | ⏳ Not integrated |
+| Pagination | ✅ Implemented | ⏳ Not integrated |
+| Unit Tests | ❌ Pending | — |
+| Logging | ❌ Pending | — |
 
-Possible future improvements include:
+---
 
-* Integrate frontend authentication with JWT login flow
-* Add frontend pagination support for large datasets
-* Add backend logging for better monitoring and debugging
-* Add unit tests for business rules and API endpoints
-* Add role-based access control
-* Add dashboard analytics for fleet usage and delivery performance
-* Add search and filtering across trucks, drivers, and jobs
-* Add form-level loading and error states across all pages
-* Improve assignment UI with busy/available indicators
-* Migrate from SQLite to PostgreSQL for production readiness
-* Add deployment configuration for cloud hosting
-* Add audit trails for status changes and assignments
+## 🔭 Roadmap
 
+- [ ] Integrate JWT authentication into the frontend
+- [ ] Add frontend pagination for large datasets
+- [ ] Write unit tests for business rules and API endpoints
+- [ ] Add backend logging and monitoring
+- [ ] Role-based access control (admin, driver, dispatcher)
+- [ ] Dashboard analytics for fleet usage and delivery performance
+- [ ] Search and filtering across trucks, drivers, and jobs
+- [ ] Migrate from SQLite to PostgreSQL for production
+- [ ] Audit trails for status changes and assignments
+- [ ] Cloud deployment configuration
 
-## Submission Notes
+---
 
-Deliverables included:
+## 🗄️ Database
 
-* GitHub repository
-* Docker setup
-* API implementation
-* CRUD functionality
-* Business rule enforcement
-* README documentation
+This project uses **SQLite** for simplicity and faster local setup during the technical assessment. While **PostgreSQL** was preferred in the assessment brief, SQLite keeps development and testing lightweight and dependency-free.
 
-## Author
+For production use, migrating to PostgreSQL is recommended and included in the roadmap.
 
-**Tawanda**
-Fullstack Developer with interest in building real-world systems that combine clean APIs, strong business logic, and practical user interfaces.
+---
 
-## Final Note
+## 👨‍💻 Author
 
-This project demonstrates:
+**Tawanda**  
+Fullstack Developer passionate about building real-world systems that combine clean APIs, strong business logic, and practical user interfaces.
 
-* REST API development
-* Frontend-backend integration
-* Business rule implementation
-* Dockerized setup
-* Manual and API-based testing
-* Structured monolith system design
+---
 
+## 📋 Submission Checklist
+
+- [x] GitHub repository
+- [x] Docker setup
+- [x] REST API implementation
+- [x] Full CRUD functionality
+- [x] Business rule enforcement
+- [x] README documentation
+- [x] Manual and API-based testing
+
+---
+
+<div align="center">
+
+*Built with ❤️ for the Marytechenock Solutions Technical Assessment*
+
+</div>
